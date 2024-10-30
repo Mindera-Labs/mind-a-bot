@@ -58,8 +58,8 @@ cd ~
 sudo apt update
 sudo apt install python3-pip
 sudo apt install portaudio19-dev
-git clone --recurse-submodules https://github.com/legion1581/go2_webrtc_connect.git
-cd go2_webrtc_connect
+git clone --recurse-submodules https://github.com/Mindera-Labs/mind-a-bot.git
+cd mind-a-bot
 pip install -e .
 ```
 
