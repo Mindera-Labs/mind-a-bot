@@ -60,7 +60,7 @@ async def main():
 
 
         # Perform a "Move Forward" movement
-        print("Moving forward.....")
+        print("Moving forward...")
         data_points = []
         for i in range(30):
             # Generate or compute the parameters for each data point
