@@ -35,7 +35,7 @@ async def lifespan():
     await conn_handler.connect()
     await asyncio.create_task(acquire_robot_data(conn_handler.connection))
     yield
-    await conn_handler.connection.close()
+    await conn_handler.close()
 
 
 @app.post("/control")

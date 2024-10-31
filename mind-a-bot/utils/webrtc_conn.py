@@ -36,6 +36,12 @@ class WebRTCConnectionHandler:
             logging.error(f"Error during connection: {e}")
             raise
 
+    # handle connection closing
+    async def close(self):
+        """Close the WebRTC connection."""
+        await self.connection.disconnect()
+        logging.info("Connection closed.")
+
 # Example of usage (commented out, can be used for testing this module)
 # if __name__ == "__main__":
 #     conn_handler = WebRTCConnectionHandler()
