@@ -1,92 +1,65 @@
-import asyncio
-import json
+from fastapi import FastAPI, BackgroundTasks
+from pydantic import BaseModel
+from typing import Optional
 import logging
-from aiohttp import web
+import yaml
+import uvicorn
+import asyncio
+from utils.webrtc_conn import WebRTCConnectionHandler
+from data_acquisition.robot_data import acquire_robot_data  # Import the new function
+from contextlib import asynccontextmanager
 
-# Placeholder for RTC_TOPIC and SPORT_CMD definitions
-RTC_TOPIC = {
-    "MOTION_SWITCHER": "rtc/topic/motion_switcher",
-    "SPORT_MOD": "rtc/topic/sport_mod",
-    "VUI": "rtc/topic/vui",
-    "LF_SPORT_MOD_STATE": "rtc/topic/lf_sport_mod_state"
-}
-SPORT_CMD = {
-    "Hello": 1  # Replace with actual command ID
-}
+# LOAD YAML CONFIG
+def load_config():
+    with open("config.yaml", "r") as file:
+        return yaml.safe_load(file)
+config = load_config()
 
-class Go2WebRTCConnection:
-    def __init__(self, method, ip=None):
-        # Initialize connection attributes
-        self.method = method
-        self.ip = ip
-        self.datachannel = None
 
-    async def connect(self):
-        # Simulated connection method
-        logging.info(f"Connecting to {self.method} at {self.ip}")
-        self.datachannel = DataChannel()  # Mock data channel object
+# CONFIGURE LOGGING
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-class DataChannel:
-    async def pub_sub(self, topic, data):
-        # Placeholder implementation for public and subscription logic
-        pass
+# CONSTANTS
+app = FastAPI()
+conn_handler = WebRTCConnectionHandler()
 
-    async def publish_request_new(self, topic, data):
-        # Simulate publishing a request to a topic
-        logging.info(f"Published to {topic}: {data}")
-        return {"data": {"header": {"status": {"code": 0}}, "data": json.dumps({"brightness": 5})}}
+class ControlRequest(BaseModel):
+    rtc_topic: str
+    api_id: int
+    optional_param: Optional[str] = None  # Optional parameter if needed
 
-async def acquire_robot_data(conn):
-    # Placeholder for the data acquisition logic (Lidar, Go2 Status, etc.)
-    await conn.connect()
 
-    def lidar_callback(message):
-        logging.info("Lidar message received: %s", message["data"])
+@asynccontextmanager
+async def lifespan():
+    # Connect to the robot in the background
+    await conn_handler.connect()
+    await asyncio.create_task(acquire_robot_data(conn_handler.connection))
+    yield
+    await conn_handler.connection.close()
 
-    # Subscribe to Lidar or other data sources
-    conn.datachannel.pub_sub.subscribe("rt/utlidar/voxel_map_compressed", lidar_callback)
 
-    # Keep this task running indefinitely to acquire data
-    while True:
-        await asyncio.sleep(1)
+@app.post("/control")
+async def control_robot(control_request: ControlRequest):
+    logging.info(f"Received control request: {control_request}")
 
-async def control_robot(conn, request):
-    # Extract command from request
-    data = await request.json()
-    rtc_topic = data.get("rtc_topic")
-    api_id = data.get("api_id")
+    # Access the configuration values
+    robot_ip = config['robot']['ip']
+    webrtc_method = config['robot']['webrtc_connection_method']
 
-    logging.info(f"Received control command for {rtc_topic} with API ID: {api_id}")
+    # Log the robot IP and WebRTC connection method
+    logging.info(f"Robot IP: {robot_ip}, WebRTC Method: {webrtc_method}")
 
-    # Publish the command to the robot
-    await conn.datachannel.pub_sub.publish_request_new(rtc_topic, {"api_id": api_id})
+    # Here you would typically publish the command to the robot
+    # For now, we'll just log the request
+    response = {
+        "rtc_topic": control_request.rtc_topic,
+        "api_id": control_request.api_id,
+        "optional_param": control_request.optional_param
+    }
+    if not control_request.optional_param:
+        response.pop("optional_param")
 
-    return web.Response(text=f"Command sent to {rtc_topic}.")
+    return response
 
-async def main():
-    logging.basicConfig(level=logging.INFO)
-
-    # Initialize WebRTC connection
-    conn = Go2WebRTCConnection(method="LocalSTA", ip="192.168.2.126")
-
-    # Create a web application to handle POST requests
-    app = web.Application()
-    app.router.add_post('/control', lambda request: control_robot(conn, request))
-
-    # Start the aiohttp web server
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, 'localhost', 8080)
-    await site.start()
-
-    # Start acquiring data
-    await acquire_robot_data(conn)
-
-    # Run forever (or until an external signal like CTRL+C is sent)
-    while True:
-        await asyncio.sleep(3600)  # Main loop sleeping, should run indefinitely
-
-try:
-    asyncio.run(main())
-except KeyboardInterrupt:
-    print("Shutting down...")
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8080)
