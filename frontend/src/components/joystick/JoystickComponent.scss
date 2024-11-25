@@ -1,0 +1,80 @@
+.joystick-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: none;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  padding: 10px;
+
+  .joystick-base {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-bottom: 60px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .joystick-stick {
+      width: 40%;
+      height: 40%;
+      background: #0099ff;
+      border-radius: 50%;
+      position: absolute;
+      transition: transform 0.05s;
+      pointer-events: none;
+
+      &:hover {
+        background: #33adff;
+      }
+    }
+  }
+
+  .rotation-controls {
+    position: absolute;
+    bottom: 10px;
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .rotation-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0, 153, 255, 0.8);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+      &:hover {
+        background: #33adff;
+      }
+
+      &:active {
+        background: rgba(0, 128, 255, 0.9);
+        transform: scale(0.95);
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}

@@ -17,6 +17,7 @@ Thumbs.db
 # Ignore virtual environments (if applicable)
 venv/
 env/
+.env
 
 # Ignore IDE specific files (optional, if you're using an IDE like PyCharm, VS Code, etc.)
 .idea/
@@ -26,3 +27,6 @@ output.wav
 output_video.mp4
 
 build/
+
+# Ignore the node_modules directory
+node_modules/

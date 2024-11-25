@@ -1,3 +1,5 @@
 robot:
   ip: "192.168.2.126"
   webrtc_connection_method: "LocalSTA"
+openai:
+  voice: "alloy"
