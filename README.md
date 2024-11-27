@@ -71,3 +71,7 @@ Example programs are located in the /example directory.
 A big thank you to TheRoboVerse community! Visit us at [TheRoboVerse](https://theroboverse.com) for more information and support.
 
 Special thanks to the [tfoldi WebRTC project](https://github.com/tfoldi/go2-webrtc) and [abizovnuralem](https://github.com/abizovnuralem) for adding LiDAR support!
+
+# Nice repos:
+[Unitree Mujoco](https://github.com/unitreerobotics/unitree_mujoco/)
+[Sbus](https://github.com/BenCaunt/go2-sbus-unleashed/tree/camera-spike)
